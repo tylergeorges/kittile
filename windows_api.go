@@ -3,6 +3,7 @@ package main
 import (
 	"strings"
 	"syscall"
+	"unsafe"
 
 	"github.com/0xrawsec/golang-win32/win32"
 	"github.com/0xrawsec/golang-win32/win32/kernel32"
@@ -58,13 +59,53 @@ func SetWindowPos(window, position w32.HWND, layout *rect.Rect, flags int) {
 	)
 }
 
+func window_rect(hwnd w32.HWND) *w32.RECT {
+
+	var r windows.Rect
+
+	if hwnd == 0 {
+		return w32.GetWindowRect(hwnd)
+	}
+
+	ptr := unsafe.Pointer(&r)
+	size := (uint32)(unsafe.Sizeof(r))
+
+	handle := (windows.HWND)(hwnd)
+
+	err := windows.DwmGetWindowAttribute(handle, windows.DWMWA_EXTENDED_FRAME_BOUNDS, ptr, size)
+
+	if err != nil {
+		window_rect := w32.GetWindowRect(hwnd)
+		return window_rect
+	}
+
+	return &w32.RECT{
+		Left:   r.Left,
+		Right:  r.Right,
+		Bottom: r.Bottom,
+		Top:    r.Top,
+	}
+
+}
+
+func shadow_rect(hwnd w32.HWND) rect.Rect {
+	window_rect := rect.FromRECT(*window_rect(hwnd))
+	shadow_rect := rect.FromRECT(*w32.GetWindowRect(hwnd))
+
+	return shadow_rect.Sub(window_rect)
+}
+
 func PositionWindow(window w32.HWND, layout *rect.Rect, top bool) {
 	flags := w32.SWP_NOACTIVATE | w32.SWP_NOSENDCHANGING | w32.SWP_NOCOPYBITS | w32.SWP_FRAMECHANGED
+
+	srect := shadow_rect(window)
+
+	offset_rect := layout.Add(srect)
 
 	SetWindowPos(
 		window,
 		w32.HWND_TOP,
-		layout,
+		&offset_rect,
 		flags,
 	)
 }

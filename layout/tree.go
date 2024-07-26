@@ -68,15 +68,6 @@ func (t TreeNode) NodeName() string {
 	return w32.GetWindowText(t.Id)
 }
 
-func (t TreeNode) get_next_direction() Direction {
-	if t.direction == Vertical {
-		return Horizontal
-	}
-
-	return Vertical
-
-}
-
 func (t TreeNode) NodeExists(id w32.HWND) bool {
 	node := t.FindById(id)
 
@@ -119,9 +110,12 @@ func (t *TreeNode) UpdateLayout(second_child *TreeNode) {
 				first_child = *t.SecondChild
 			}
 
-			second_child.SetGeom(first_child.Layout.X, first_child.Layout.Y+first_child.Layout.Height/2, first_child.Layout.Width, first_child.Layout.Height/2)
+			x, y, width, height := first_child.Layout.Pieces()
 
-			first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width, first_child.Layout.Height/2)
+			half_height := height / 2
+
+			second_child.SetGeom(x, y+half_height, width, half_height)
+			first_child.SetGeom(x, y, width, half_height)
 
 			dir = Vertical
 		}
@@ -135,9 +129,12 @@ func (t *TreeNode) UpdateLayout(second_child *TreeNode) {
 				first_child = *t.SecondChild
 			}
 
-			second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
+			x, y, width, height := first_child.Layout.Pieces()
 
-			first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
+			half_width := width / 2
+
+			second_child.SetGeom(x+half_width, y, half_width, height)
+			first_child.SetGeom(x, y, half_width, height)
 
 			dir = Horizontal
 		}
@@ -147,6 +144,7 @@ func (t *TreeNode) UpdateLayout(second_child *TreeNode) {
 	if t.SecondChild == nil {
 		t.SecondChild = second_child
 	}
+
 	leaf := NewLeaf(t.SecondChild, second_child, t, dir)
 	leaf.direction = dir
 
@@ -171,31 +169,13 @@ func (t *TreeNode) Insert(second_child *TreeNode) {
 		return
 	}
 
-	// is_root := t.SecondChild != nil // if true, second child should be replaced with leaf node
-
-	// if is_root {
-
 	if t.SecondChild != nil && t.SecondChild.IsLeaf() {
 		t.SecondChild.Insert(second_child)
 
 		return
 	}
-	// }
 
 	t.UpdateLayout(second_child)
-
-	// var first_child = *t.FirstChild
-
-	// if t.SecondChild != nil {
-	// 	first_child = *t.SecondChild
-	// }
-
-	// second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	// first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	// t.SecondChild = second_child
-
 }
 
 func (t *TreeNode) FindById(id w32.HWND) *TreeNode {
