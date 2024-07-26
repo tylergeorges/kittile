@@ -19,12 +19,13 @@ func (ws *Workspace) ApplyLayout(n *layout.TreeNode) {
 		return
 	}
 
-	PositionWindow(n.Id, n.Layout, true)
-
+	
 	if n.IsLeaf() {
 		ws.ApplyLayout(n.FirstChild)
 		ws.ApplyLayout(n.SecondChild)
 	}
+	
+	PositionWindow(n.Id, n.Layout, true)
 
 }
 

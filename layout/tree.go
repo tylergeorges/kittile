@@ -103,6 +103,61 @@ func (t TreeNode) String() string {
 	return fmt.Sprintf("root: %s\nFirst Child:%s \nSecond Child:%s \nDirection:%s  \n----------------------\n", root, first_child, second_child, *t.GetDirection())
 }
 
+func (t TreeNode) get_current_direction() Direction {
+	return t.direction
+}
+
+func (t *TreeNode) UpdateLayout(second_child *TreeNode) {
+	var dir Direction
+
+	dir = t.direction
+
+	switch dir {
+	case Horizontal: // windows should stack on top of eachother
+		{
+			var first_child TreeNode
+
+			first_child = *t.FirstChild
+
+			if t.SecondChild != nil {
+				first_child = *t.SecondChild
+			}
+
+			second_child.SetGeom(first_child.Layout.X, first_child.Layout.Y+first_child.Layout.Height/2, first_child.Layout.Width, first_child.Layout.Height/2)
+
+			first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width, first_child.Layout.Height/2)
+
+			dir = Vertical
+		}
+
+	default:
+		{
+			var first_child TreeNode
+			first_child = *t.FirstChild
+
+			if t.SecondChild != nil {
+				first_child = *t.SecondChild
+			}
+
+			second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
+
+			first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
+
+			dir = Horizontal
+		}
+
+	}
+
+	if t.SecondChild == nil {
+		t.SecondChild = second_child
+	}
+	leaf := NewLeaf(t.SecondChild, second_child, t, dir)
+	leaf.direction = dir
+
+	t.SecondChild = leaf
+
+}
+
 func (t *TreeNode) Insert(second_child *TreeNode) {
 	exists := t.NodeExists(second_child.Id)
 
@@ -120,161 +175,32 @@ func (t *TreeNode) Insert(second_child *TreeNode) {
 		return
 	}
 
-	is_root := t.SecondChild != nil // if true, second child should be replaced with leaf node
+	// is_root := t.SecondChild != nil // if true, second child should be replaced with leaf node
 
-	if is_root {
+	fmt.Printf("%v\n", t)
 
-		if t.SecondChild.IsLeaf() {
-			t.SecondChild.Insert(second_child)
+	// if is_root {
 
-			return
-		}
-
-		var dir = t.get_next_direction()
-
-		switch dir {
-		case Horizontal: // windows should stack on top of eachother
-			{
-				var first_child = *t.FirstChild
-
-				if t.SecondChild != nil {
-					first_child = *t.SecondChild
-				}
-
-				second_child.SetGeom(first_child.Layout.X, first_child.Layout.Y+first_child.Layout.Height/2, first_child.Layout.Width, first_child.Layout.Height/2)
-
-				first_child.SetGeom(first_child.Layout.X, 0, first_child.Layout.Width, first_child.Layout.Height/2)
-
-				dir = Vertical
-
-			}
-
-		case Vertical:
-			{
-				var first_child = *t.FirstChild
-
-				if t.SecondChild != nil {
-					first_child = *t.SecondChild
-				}
-
-				second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-				first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-				dir = Horizontal
-			}
-
-		}
-
-		leaf := NewLeaf(t.SecondChild, second_child, t, dir)
-
-		leaf.direction = dir
-
-		t.SecondChild = leaf
+	if t.SecondChild != nil && t.SecondChild.IsLeaf() {
+		t.SecondChild.Insert(second_child)
 
 		return
 	}
-
-	var first_child = *t.FirstChild
-
-	if t.SecondChild != nil {
-		first_child = *t.SecondChild
-	}
-
-	second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	t.SecondChild = second_child
-
-	// if t.parent == nil { // if root node
-	// 	var first_child = *t.FirstChild
-
-	// 	if t.SecondChild != nil {
-	// 		first_child = *t.SecondChild
-	// 	}
-
-	// 	second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	// 	first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	// 	t.SecondChild = second_child
-	// 	return
 	// }
 
-	// switch dir {
-	// case Horizontal: // windows should stack on top of eachother
-	// 	{
+	t.UpdateLayout(second_child)
 
-	// 		// if t.parent != nil {
-	// 		// 	left_layout := t.Layout
+	// var first_child = *t.FirstChild
 
-	// 		// 	base_copy := rect.New(left_layout.X, left_layout.Y, left_layout.Width, left_layout.Height/2)
-
-	// 		// 	copy = base_copy
-
-	// 		// }
-
-	// 		// else {
-	// 		// 	left_layout := t.Layout.Copy()
-
-	// 		// 	base_copy := rect.New(left_layout.X, left_layout.Y, left_layout.Width, 500)
-
-	// 		// 	copy = base_copy
-	// 		// 	// copy = t.Layout.Copy()
-	// 		// }
-
-	// 		// first_child := *t.Left
-	// 		// first_child.Layout.Height = half_height
-
-	// 		// copy.Height /= 2
-
-	// 		// node.Layout.Height = half_height
-	// 		// node.Layout.Y += half_height
-
-	// 		// half_height := copy.Height / 2
-
-	// 		second_child.SetGeom(t.Layout.X, t.Layout.Y+t.Layout.Height/2, t.Layout.Width, t.Layout.Height/2)
-
-	// 		t.SetGeom(t.Layout.X, t.Layout.Height/2, t.Layout.Width, t.Layout.Height/2)
-
-	// 	}
-
-	// case Vertical:
-	// 	{
-	// 		var first_child = *t.FirstChild
-
-	// 		if t.SecondChild != nil {
-	// 			first_child = *t.SecondChild
-	// 		}
-
-	// 		second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	// 		first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
-
-	// 	}
-
+	// if t.SecondChild != nil {
+	// 	first_child = *t.SecondChild
 	// }
 
-	// var new_dir Direction
+	// second_child.SetGeom(first_child.Layout.X+first_child.Layout.Width/2, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
 
-	// if dir == Horizontal {
-	// 	new_dir = Vertical
-	// } else {
-	// 	new_dir = Horizontal
-	// }
+	// first_child.SetGeom(first_child.Layout.X, first_child.Layout.Y, first_child.Layout.Width/2, first_child.Layout.Height)
 
-	// leaf := NewLeaf(t.SecondChild, second_child, t, new_dir)
-
-	// leaf.direction = new_dir
-
-	// t.SecondChild = leaf
-
-	// return
-
-	// }
-
-	// t.SecondChild.Insert(second_child)
+	// t.SecondChild = second_child
 
 }
 
