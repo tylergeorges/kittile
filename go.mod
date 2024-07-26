@@ -1,4 +1,4 @@
-module github.com/tylergeorges/kitty
+module github.com/tylergeorges/kittile
 
 go 1.22.5
 

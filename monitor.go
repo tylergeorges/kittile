@@ -2,8 +2,8 @@ package main
 
 import (
 	w32 "github.com/gonutz/w32/v2"
-	"github.com/tylergeorges/kitty/layout"
-	"github.com/tylergeorges/kitty/rect"
+	"github.com/tylergeorges/kittile/layout"
+	"github.com/tylergeorges/kittile/rect"
 )
 
 type Monitor struct {

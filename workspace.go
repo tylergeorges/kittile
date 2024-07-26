@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/tylergeorges/kitty/layout"
+	"github.com/tylergeorges/kittile/layout"
 )
 
 type Workspace struct {

@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/gonutz/w32/v2"
-	"github.com/tylergeorges/kitty/rect"
+	"github.com/tylergeorges/kittile/rect"
 )
 
 type Window struct {

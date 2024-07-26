@@ -1,6 +1,6 @@
 package main
 
-import "github.com/tylergeorges/kitty/layout"
+import "github.com/tylergeorges/kittile/layout"
 
 type Container struct {
 	windows []Window

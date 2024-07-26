@@ -7,7 +7,7 @@ import (
 	"github.com/0xrawsec/golang-win32/win32"
 	"github.com/0xrawsec/golang-win32/win32/kernel32"
 	"github.com/gonutz/w32/v2"
-	"github.com/tylergeorges/kitty/rect"
+	"github.com/tylergeorges/kittile/rect"
 	"golang.org/x/sys/windows"
 )
 
