@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	w32 "github.com/gonutz/w32/v2"
 	"github.com/tylergeorges/kitty/layout"
 	"github.com/tylergeorges/kitty/rect"
@@ -28,9 +26,6 @@ func (m *Monitor) LoadFocusedWorkspace() {
 
 		if window.IsVisible() && window.IsWindow() && !is_minimized && window.HasTitle() && window.Exe() {
 			node := layout.NewNode(w)
-
-			title := window.GetWindowTitle()
-			fmt.Printf("window title: %v\n", title)
 
 			tree.Insert(node)
 		}

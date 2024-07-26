@@ -103,10 +103,6 @@ func (t TreeNode) String() string {
 	return fmt.Sprintf("root: %s\nFirst Child:%s \nSecond Child:%s \nDirection:%s  \n----------------------\n", root, first_child, second_child, *t.GetDirection())
 }
 
-func (t TreeNode) get_current_direction() Direction {
-	return t.direction
-}
-
 func (t *TreeNode) UpdateLayout(second_child *TreeNode) {
 	var dir Direction
 
@@ -176,8 +172,6 @@ func (t *TreeNode) Insert(second_child *TreeNode) {
 	}
 
 	// is_root := t.SecondChild != nil // if true, second child should be replaced with leaf node
-
-	fmt.Printf("%v\n", t)
 
 	// if is_root {
 
