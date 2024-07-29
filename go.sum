@@ -2,6 +2,8 @@ github.com/0xrawsec/golang-utils v1.3.0 h1:fMgwKu5M2PXFwEfwN9B2T1bfg7LPCaV9fL6Xs
 github.com/0xrawsec/golang-utils v1.3.0/go.mod h1:DADTtCFY10qXjWmUVhhJqQIZdSweaHH4soYUDEi8mj0=
 github.com/0xrawsec/golang-win32 v1.0.14 h1:Lj45Cd7qnhCbtnrNCBI3twefRVh759q/rDXrutxQQOo=
 github.com/0xrawsec/golang-win32 v1.0.14/go.mod h1:LDGq8VzCwLZccK1qg7oKBc8n5DmPLi79w+wjew1UApg=
+github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 h1:XBBHcIb256gUJtLmY22n99HaZTz+r2Z51xUPi01m3wg=
+github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203/go.mod h1:E1jcSv8FaEny+OP/5k9UxZVw9YFWGj7eI4KR/iOBqCg=
 github.com/gonutz/w32/v2 v2.11.1 h1:plG738ZY7VIkPGf3adZ6lFeAf2evCKrULKyZT5GrPoc=
 github.com/gonutz/w32/v2 v2.11.1/go.mod h1:MgtHx0AScDVNKyB+kjyPder4xIi3XAcHS6LDDU2DmdE=
 github.com/kr/fs v0.1.0/go.mod h1:FFnZGqtBN9Gxj7eW1uZ42v5BccTP0vu6NEaFoC2HwRg=

@@ -18,7 +18,7 @@ type TreeNode struct {
 }
 
 func NewLeaf(first_child, second_child, parent *TreeNode, d direction) *TreeNode {
-	return &TreeNode{FirstChild: first_child, SecondChild: second_child, direction: d, Layout: parent.Layout}
+	return &TreeNode{FirstChild: first_child, SecondChild: second_child, direction: d}
 
 }
 
@@ -38,14 +38,15 @@ func NewNode(id w32.HWND) *TreeNode {
 }
 
 func (t *TreeNode) Display() {
-
-	if t == nil || (t.Layout.IsEmpty() && !t.IsLeaf()) {
+	if t == nil {
 		return
 	}
+
+	windows_api.PositionWindow(t.Id, t.Layout, true)
+
 	t.FirstChild.Display()
 	t.SecondChild.Display()
 
-	windows_api.PositionWindow(t.Id, t.Layout, true)
 }
 
 func (t TreeNode) GetDirection() *string {
@@ -106,7 +107,6 @@ func (t TreeNode) String() string {
 }
 
 func (t *TreeNode) ApplyLayouts() {
-
 	if t == nil {
 		return
 	}
@@ -116,8 +116,6 @@ func (t *TreeNode) ApplyLayouts() {
 	switch dir {
 	case Horizontal: // windows should stack on top of eachother
 		{
-
-			// first_child = *t.SecondChild
 			x, y, width, height := t.Layout.Pieces()
 			half_height := height / 2
 
@@ -131,7 +129,6 @@ func (t *TreeNode) ApplyLayouts() {
 
 	case Vertical:
 		{
-
 			x, y, width, height := t.Layout.Pieces()
 
 			half_width := width / 2
@@ -189,7 +186,6 @@ func (t *TreeNode) Insert(second_child *TreeNode) {
 	leaf := NewLeaf(first_child, second_child, t, t.get_next_direction())
 
 	t.SecondChild = leaf
-
 }
 
 func (t *TreeNode) FindById(id w32.HWND) *TreeNode {
@@ -247,15 +243,15 @@ func (t *TreeNode) FlipTree(flp flip_direction) {
 		tmp = t.FirstChild
 
 		t.FirstChild = t.SecondChild
-		t.SecondChild = tmp
 
+		t.SecondChild = tmp
 	}
 
-	t.FirstChild.FlipTree(flp)
 	t.SecondChild.FlipTree(flp)
+	t.FirstChild.FlipTree(flp)
 }
 
-func (t TreeNode) Render() {
+func (t *TreeNode) Render() {
 	t.ApplyLayouts()
 	t.Display()
 }
