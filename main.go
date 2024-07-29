@@ -1,10 +1,7 @@
 package main
 
 func main() {
-	window_manager := NewWindowManager()
+	wm := NewWindowManager()
 
-	monitor := window_manager.Monitors
-
-	monitor.UpdateWorkspace()
-
+	wm.Run()
 }

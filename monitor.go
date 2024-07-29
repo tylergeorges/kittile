@@ -4,6 +4,7 @@ import (
 	w32 "github.com/gonutz/w32/v2"
 	"github.com/tylergeorges/kittile/layout"
 	"github.com/tylergeorges/kittile/rect"
+	"github.com/tylergeorges/kittile/windows_api"
 )
 
 type Monitor struct {
@@ -11,16 +12,16 @@ type Monitor struct {
 
 	work_area rect.Rect
 
-	workspace Workspace
+	workspace *Workspace
 
 	id w32.HMONITOR
 }
 
 func (m *Monitor) LoadFocusedWorkspace() {
-	tree := layout.NewTree(&m.work_area)
+	tree := layout.NewTree(&m.work_area, true)
 
 	w32.EnumWindows(func(w w32.HWND) bool {
-		is_minimized := IsIconic(w)
+		is_minimized := windows_api.IsIconic(w)
 
 		window := NewWindow(w)
 
@@ -34,13 +35,13 @@ func (m *Monitor) LoadFocusedWorkspace() {
 
 	})
 
-	m.workspace.Tree = tree
+	m.workspace.SetTree(tree)
 
 }
 
-func (m Monitor) UpdateWorkspace() {
-	m.workspace.Update()
-}
+// func (m *Monitor) UpdateWorkspace() {
+// 	m.workspace.Update()
+// }
 
 func NewMonitor(w w32.HWND) *Monitor {
 	monitor_id := w32.MonitorFromWindow(w, w32.MONITOR_DEFAULTTOPRIMARY)
@@ -55,7 +56,7 @@ func NewMonitor(w w32.HWND) *Monitor {
 		work_area: work_area,
 		size:      rect.FromRECT(monitor_info.RcMonitor),
 		id:        monitor_id,
-		workspace: *NewWorkspace(),
+		workspace: NewWorkspace(),
 	}
 
 	monitor.LoadFocusedWorkspace()

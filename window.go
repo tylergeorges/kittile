@@ -5,6 +5,7 @@ import (
 
 	"github.com/gonutz/w32/v2"
 	"github.com/tylergeorges/kittile/rect"
+	"github.com/tylergeorges/kittile/windows_api"
 )
 
 type Window struct {
@@ -12,7 +13,7 @@ type Window struct {
 }
 
 func (w *Window) SetPosition(layout rect.Rect, top bool) {
-	PositionWindow(w.hwnd, &layout, top)
+	windows_api.PositionWindow(w.hwnd, &layout, top)
 }
 
 func GetWindowThreadProcessId(hwnd w32.HWND) (uint32, uint32) {
@@ -25,10 +26,10 @@ func GetWindowThreadProcessId(hwnd w32.HWND) (uint32, uint32) {
 func (w *Window) Exe() bool {
 	_, process_id := GetWindowThreadProcessId(w.hwnd)
 
-	handle := ProcessHandle(process_id)
-	_, err := Exe(handle)
+	handle := windows_api.ProcessHandle(process_id)
+	_, err := windows_api.Exe(handle)
 
-	CloseProcess(handle)
+	windows_api.CloseProcess(handle)
 
 	return err == nil
 }

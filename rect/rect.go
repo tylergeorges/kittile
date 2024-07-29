@@ -26,11 +26,20 @@ func (r Rect) Copy() Rect {
 }
 
 func (r *Rect) SetGeom(x, y, w, h int) {
+	
 	r.X = x
 	r.Y = y
 
 	r.Width = w
 	r.Height = h
+}
+
+func (r *Rect) IsEmpty() bool {
+	if r == nil {
+		return true
+	}
+
+	return r.X == 0 && r.Y == 0 && r.Height == 0 && r.Width == 0
 }
 
 // Convert a [w32.RECT] to a [Rect]

@@ -1,4 +1,4 @@
-package main
+package windows_api
 
 import (
 	"strings"

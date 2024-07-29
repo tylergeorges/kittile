@@ -1,10 +1,7 @@
 package main
 
-import "github.com/tylergeorges/kittile/layout"
-
 type Container struct {
 	windows []Window
-	Layout  *layout.Layout
 }
 
 func (c *Container) AddWindow(w *Window) {

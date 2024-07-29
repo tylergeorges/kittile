@@ -5,32 +5,40 @@ import (
 )
 
 type Workspace struct {
-	Tree *layout.TreeNode
+	tree *layout.TreeNode
 }
 
 func NewWorkspace() *Workspace {
 	return &Workspace{
-		Tree: nil,
+		tree: nil,
 	}
 }
 
+func (ws *Workspace) SetTree(t *layout.TreeNode) {
+	ws.tree = t
+}
+
+func (ws *Workspace) GetTree() *layout.TreeNode {
+	return ws.tree
+
+}
+
 func (ws *Workspace) ApplyLayout(n *layout.TreeNode) {
-	if n == nil || (n.Layout == nil && !n.IsLeaf()) {
+
+	if n == nil || (n.Layout.IsEmpty() && !n.IsLeaf()) {
 		return
 	}
 
-	
 	if n.IsLeaf() {
 		ws.ApplyLayout(n.FirstChild)
 		ws.ApplyLayout(n.SecondChild)
 	}
-	
-	PositionWindow(n.Id, n.Layout, true)
 
 }
 
-func (ws *Workspace) Update() {
-	node := ws.Tree
+// func (ws *Workspace) Update() {
+// 	node := ws.Tree
 
-	ws.ApplyLayout(node)
-}
+// 	node.FlipTree(layout.FlipVertical)
+// 	node.Render()
+// }

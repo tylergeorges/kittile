@@ -5,6 +5,7 @@ import (
 
 	"github.com/gonutz/w32/v2"
 	"github.com/tylergeorges/kittile/rect"
+	"github.com/tylergeorges/kittile/windows_api"
 )
 
 type TreeNode struct {
@@ -13,11 +14,11 @@ type TreeNode struct {
 	parent      *TreeNode
 	Layout      *rect.Rect
 	Id          w32.HWND
-	direction   Direction
+	direction   direction
 }
 
-func NewLeaf(first_child, second_child, parent *TreeNode, direction Direction) *TreeNode {
-	return &TreeNode{FirstChild: first_child, SecondChild: second_child, direction: direction, Layout: parent.Layout}
+func NewLeaf(first_child, second_child, parent *TreeNode, d direction) *TreeNode {
+	return &TreeNode{FirstChild: first_child, SecondChild: second_child, direction: d, Layout: parent.Layout}
 
 }
 
@@ -26,7 +27,6 @@ func (t *TreeNode) SetGeom(x, y, w, h int) {
 		new_rect := rect.New(x, y, w, h)
 
 		t.Layout = &new_rect
-
 		return
 	}
 
@@ -34,7 +34,18 @@ func (t *TreeNode) SetGeom(x, y, w, h int) {
 }
 
 func NewNode(id w32.HWND) *TreeNode {
-	return &TreeNode{FirstChild: nil, SecondChild: nil, Id: id, parent: nil}
+	return &TreeNode{FirstChild: nil, SecondChild: nil, Id: id, parent: nil, Layout: nil}
+}
+
+func (t *TreeNode) Display() {
+
+	if t == nil || (t.Layout.IsEmpty() && !t.IsLeaf()) {
+		return
+	}
+	t.FirstChild.Display()
+	t.SecondChild.Display()
+
+	windows_api.PositionWindow(t.Id, t.Layout, true)
 }
 
 func (t TreeNode) GetDirection() *string {
@@ -56,11 +67,11 @@ func (t TreeNode) GetDirection() *string {
 	return &out
 }
 
-func (t TreeNode) IsLeaf() bool {
-	return t.Id == 0
+func (t *TreeNode) IsLeaf() bool {
+	return t.FirstChild != nil && t.SecondChild != nil
 }
 
-func (t TreeNode) NodeName() string {
+func (t *TreeNode) NodeName() string {
 	if t.IsLeaf() {
 		return "Leaf"
 	}
@@ -94,62 +105,58 @@ func (t TreeNode) String() string {
 	return fmt.Sprintf("root: %s\nFirst Child:%s \nSecond Child:%s \nDirection:%s  \n----------------------\n", root, first_child, second_child, *t.GetDirection())
 }
 
-func (t *TreeNode) UpdateLayout(second_child *TreeNode) {
-	var dir Direction
+func (t *TreeNode) ApplyLayouts() {
 
-	dir = t.direction
+	if t == nil {
+		return
+	}
+
+	dir := t.direction
 
 	switch dir {
 	case Horizontal: // windows should stack on top of eachother
 		{
-			var first_child TreeNode
 
-			first_child = *t.FirstChild
-
-			if t.SecondChild != nil {
-				first_child = *t.SecondChild
-			}
-
-			x, y, width, height := first_child.Layout.Pieces()
-
+			// first_child = *t.SecondChild
+			x, y, width, height := t.Layout.Pieces()
 			half_height := height / 2
 
-			second_child.SetGeom(x, y+half_height, width, half_height)
-			first_child.SetGeom(x, y, width, half_height)
+			top_rect := rect.New(x, y, width, half_height)
+			bottom_rect := rect.New(x, y+half_height, width, half_height)
 
-			dir = Vertical
+			t.FirstChild.SetGeom(top_rect.Pieces())
+			t.SecondChild.SetGeom(bottom_rect.Pieces())
+
 		}
 
-	default:
+	case Vertical:
 		{
-			var first_child TreeNode
-			first_child = *t.FirstChild
 
-			if t.SecondChild != nil {
-				first_child = *t.SecondChild
-			}
-
-			x, y, width, height := first_child.Layout.Pieces()
+			x, y, width, height := t.Layout.Pieces()
 
 			half_width := width / 2
 
-			second_child.SetGeom(x+half_width, y, half_width, height)
-			first_child.SetGeom(x, y, half_width, height)
+			left_rect := rect.New(x, y, half_width, height)
+			right_rect := rect.New(x+half_width, y, half_width, height)
 
-			dir = Horizontal
+			t.FirstChild.SetGeom(left_rect.Pieces())
+			t.SecondChild.SetGeom(right_rect.Pieces())
+
 		}
 
 	}
 
-	if t.SecondChild == nil {
-		t.SecondChild = second_child
+	t.FirstChild.ApplyLayouts()
+	t.SecondChild.ApplyLayouts()
+
+}
+
+func (t *TreeNode) get_next_direction() direction {
+	if t.direction == Vertical {
+		return Horizontal
 	}
 
-	leaf := NewLeaf(t.SecondChild, second_child, t, dir)
-	leaf.direction = dir
-
-	t.SecondChild = leaf
-
+	return Vertical
 }
 
 func (t *TreeNode) Insert(second_child *TreeNode) {
@@ -160,22 +167,29 @@ func (t *TreeNode) Insert(second_child *TreeNode) {
 	}
 
 	if t.FirstChild == nil {
-		layout_copy := *t.Layout
-
-		second_child.SetGeom(layout_copy.Pieces())
+		second_child.SetGeom(t.Layout.Pieces())
 
 		t.FirstChild = second_child
+		return
+	}
+
+	if t.SecondChild == nil {
+		t.SecondChild = second_child
 
 		return
 	}
 
-	if t.SecondChild != nil && t.SecondChild.IsLeaf() {
+	if t.SecondChild.IsLeaf() {
 		t.SecondChild.Insert(second_child)
-
 		return
 	}
 
-	t.UpdateLayout(second_child)
+	first_child := t.SecondChild
+
+	leaf := NewLeaf(first_child, second_child, t, t.get_next_direction())
+
+	t.SecondChild = leaf
+
 }
 
 func (t *TreeNode) FindById(id w32.HWND) *TreeNode {
@@ -206,7 +220,47 @@ func (t *TreeNode) FindById(id w32.HWND) *TreeNode {
 	return nil
 }
 
-func NewTree(layout *rect.Rect) *TreeNode {
+func (t *TreeNode) IsEmpty() bool {
+	if t == nil {
+		return true
+	}
+
+	if t.IsLeaf() {
+		return t.FirstChild == nil && t.SecondChild == nil
+	}
+
+	if t.FirstChild != nil || t.SecondChild != nil {
+		return false
+	}
+
+	return true
+}
+
+func (t *TreeNode) FlipTree(flp flip_direction) {
+	if t == nil {
+		return
+	}
+
+	var tmp *TreeNode
+
+	if (flp == FlipVertical && t.direction == Vertical) || (flp == FlipHorizontal && t.direction == Horizontal) {
+		tmp = t.FirstChild
+
+		t.FirstChild = t.SecondChild
+		t.SecondChild = tmp
+
+	}
+
+	t.FirstChild.FlipTree(flp)
+	t.SecondChild.FlipTree(flp)
+}
+
+func (t TreeNode) Render() {
+	t.ApplyLayouts()
+	t.Display()
+}
+
+func NewTree(layout *rect.Rect, inverted bool) *TreeNode {
 	return &TreeNode{
 		Layout:      layout,
 		FirstChild:  nil,
